@@ -1,0 +1,19 @@
+--- reglookup-src-1.0.0/SConstruct~	2011-06-20 11:49:03.791401006 +0200
++++ reglookup-src-1.0.0/SConstruct	2011-06-20 18:55:09.830504636 +0200
+@@ -2,6 +2,7 @@
+ import os
+ sys.dont_write_bytecode = True
+ from regfi_version import REGFI_VERSION
++soname = 'libregfi.so.' + REGFI_VERSION
+ 
+ cflags = '-std=gnu99 -pedantic -Wall -D_FILE_OFFSET_BITS=64 -fvisibility=hidden'
+ cflags += ' -DREGFI_VERSION=\'"%s"\'' % REGFI_VERSION
+@@ -21,7 +22,7 @@
+ 
+ # Libraries
+ libregfi_static = env.Library(lib_src)
+-libregfi = env.SharedLibrary(lib_src, LIBS=['m','pthread', 'talloc'])
++libregfi = env.SharedLibrary(lib_src, LIBS=['m','pthread', 'talloc'], LINKFLAGS="-shared -fPIC -Wl,-soname," + soname)
+ 
+ 
+ # Executables
