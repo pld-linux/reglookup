@@ -8,6 +8,7 @@ Group:		Applications
 Source0:	http://projects.sentinelchicken.org/data/downloads/%{name}-src-%{version}.tar.gz
 # Source0-md5:	1fb1eea7435d368a91ade8c4016b5be6
 Patch0:		%{name}-paths.patch
+Patch1:		%{name}-soname.patch
 URL:		http://projects.sentinelchicken.org/reglookup/
 BuildRequires:	rpmbuild(macros) >= 1.385
 BuildRequires:	scons
@@ -87,6 +88,7 @@ Dowiązania pythona do biblioteki regfi.
 %prep
 %setup -q -n %{name}-src-%{version}
 %patch0 -p1
+%patch1 -p1
 
 %build
 %scons
@@ -106,10 +108,18 @@ INCLUDEDIR="%{_includedir}" \
 	--optimize=2 \
 	--root=$RPM_BUILD_ROOT
 
+# fix soname
+mv $RPM_BUILD_ROOT%{_libdir}/libregfi.so{,.%{version}}
+ln -sf libregfi.so.%{version} $RPM_BUILD_ROOT%{_libdir}/libregfi.so.1
+ln -sf libregfi.so.%{version} $RPM_BUILD_ROOT%{_libdir}/libregfi.so
+
 %py_postclean
 
 %clean
 rm -rf $RPM_BUILD_ROOT
+
+%post libs -p /sbin/ldconfig
+%postun libs -p /sbin/ldconfig
 
 %files
 %defattr(644,root,root,755)
@@ -118,10 +128,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %files libs
 %defattr(644,root,root,755)
-%{_libdir}/*.so
+%attr(755,root,root) %{_libdir}/*.so.*.*.*
+%attr(755,root,root) %{_libdir}/*.so.1
 
 %files devel
 %defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/*.so
 %{_includedir}/regfi
 
 %files static
