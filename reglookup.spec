@@ -1,15 +1,16 @@
 Summary:	small utility for querying NT/2K/XP/2K3/Vista registries
 Summary(pl.UTF-8):	proste narzędzie do odpytywania rejestrów NT/2K/XP/2K3/Vista
 Name:		reglookup
-Version:	0.11.0
+Version:	1.0.0
 Release:	1
 License:	GPL v3
 Group:		Applications
-Source0:	http://projects.sentinelchicken.org/data/downloads/%{name}-%{version}.tar.gz
-# Source0-md5:	6dfb99a2a848e4eeb28d3ecefb5b08c9
+Source0:	http://projects.sentinelchicken.org/data/downloads/%{name}-src-%{version}.tar.gz
+# Source0-md5:	1fb1eea7435d368a91ade8c4016b5be6
+Patch0:		%{name}-paths.patch
 URL:		http://projects.sentinelchicken.org/reglookup/
-Patch0:		%{name}-DESTDIR.patch
-Patch1:		%{name}-parallel-make.patch
+BuildRequires:	rpmbuild(macros) >= 1.385
+BuildRequires:	scons
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -36,28 +37,76 @@ Obecnie program pozwala na odczyt rejestru i wypisania go w
 ustandaryzowanym formacie. Możliwe jest także filtrowanie wyników na
 podstawie ścieżek rejestru czy typów danych.
 
+%package libs
+Summary:	reglookup shared library
+Summary(pl.UTF-8):	współdzielona biblioteka reglookup
+Group:		Libraries
+
+%description libs
+reglookup shared library.
+
+%description libs -l pl.UTF-8
+współdzielona biblioteka reglookup.
+
+%package devel
+Summary:	Header files for reglookup library
+Summary(pl.UTF-8):	Pliki nagłówkowe biblioteki reglookup
+Group:		Development/Libraries
+Requires:	%{name} = %{version}-%{release}
+
+%description devel
+Header files for reglookup library.
+
+%description devel -l pl.UTF-8
+Pliki nagłówkowe biblioteki reglookup.
+
+%package static
+Summary:	Static reglookup library
+Summary(pl.UTF-8):	Statyczna biblioteka reglookup
+Group:		Development/Libraries
+Requires:	%{name}-devel = %{version}-%{release}
+
+%description static
+Static reglookup library.
+
+%description static -l pl.UTF-8
+Statyczna biblioteka reglookup.
+
+%package -n python-pyregfi
+Summary:	Python bindings for regfi library
+Summary(pl.UTF-8):	Dowiązania pythona do blblioteki regfi
+Group:		Development/Libraries
+Requires:	%{name} = %{version}-%{release}
+
+%description -n python-pyregfi
+Python bindings for regfi library.
+
+%description -n python-pyregfi -l pl.UTF-8
+Dowiązania pythona do biblioteki regfi.
+
 %prep
-%setup -q
+%setup -q -n %{name}-src-%{version}
 %patch0 -p1
-%patch1 -p1
 
 %build
-%{__make} \
-	CC="%{__cc}" \
-	OPTS="%{rpmcflags}" \
-	INC="-I%{_includedir} -I../include" \
-	LIB="-L%{_libdir} -lm"
+%scons
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
-%{__make} install \
-	PREFIX=%{_prefix} \
-	MAN_PREFIX="%{_mandir}" \
-	DESTDIR=$RPM_BUILD_ROOT
+DESTDIR=$RPM_BUILD_ROOT \
+PREFIX="%{_prefix}" \
+BINDIR="%{_bindir}" \
+LIBDIR="%{_libdir}" \
+MANDIR="%{_mandir}" \
+INCLUDEDIR="%{_includedir}" \
+%scons install
 
-rm $RPM_BUILD_ROOT%{_mandir}/man1/\*
-mv $RPM_BUILD_ROOT%{_docdir}/%{name}/man/man1/* $RPM_BUILD_ROOT%{_mandir}/man1
+%{__python} pyregfi-distutils.py install \
+	--optimize=2 \
+	--root=$RPM_BUILD_ROOT
+
+%py_postclean
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -66,3 +115,21 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/*
 %{_mandir}/man1/reglookup*.1*
+
+%files libs
+%defattr(644,root,root,755)
+%{_libdir}/*.so
+
+%files devel
+%defattr(644,root,root,755)
+%{_includedir}/regfi
+
+%files static
+%defattr(644,root,root,755)
+%{_libdir}/lib*.a
+
+%files -n python-pyregfi
+%defattr(644,root,root,755)
+%dir %{py_sitescriptdir}/pyregfi
+%{py_sitescriptdir}/pyregfi/*.py[co]
+%{py_sitescriptdir}/*.egg-info
