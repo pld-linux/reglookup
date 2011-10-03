@@ -1,6 +1,6 @@
 --- reglookup-src-1.0.0/SConstruct~	2011-06-13 04:27:42.000000000 +0200
 +++ reglookup-src-1.0.0/SConstruct	2011-06-20 09:48:52.902314648 +0200
-@@ -44,18 +44,33 @@
+@@ -46,20 +46,34 @@
  
  # Installation
  prefix='/usr/local/'
@@ -11,16 +11,6 @@
 +mandir=prefix + 'man'
  if 'PREFIX' in os.environ:
     prefix = os.environ['PREFIX']+'/'
--
--install_items = [prefix+'bin',
--                 prefix+'lib', 
--                 prefix+'include/regfi',
--                 prefix+'man']
--
--env.Install(prefix+'bin', [reglookup, reglookup_recover, 'bin/reglookup-timeline'])
--env.Install(prefix+'lib', [libregfi, libregfi_static])
--env.Install(prefix+'include/regfi', Glob('include/*.h'))
--env.Install(prefix+'man/man1', [man_reglookup, man_reglookup_recover,
 +if 'DESTDIR' in os.environ:
 +   destdir = os.environ['DESTDIR']
 +if 'BINDIR' in os.environ:
@@ -31,19 +21,29 @@
 +   includedir = os.environ['INCLUDEDIR']
 +if 'MANDIR' in os.environ:
 +   mandir = os.environ['MANDIR']
-+
+ 
+-install_items = [prefix+'bin',
+-                 prefix+'lib', 
+-                 prefix+'include/regfi',
+-                 prefix+'man']
 +install_items = [destdir + bindir,
-+                 destdir + libdir, 
++                 destdir + libdir,
 +                 destdir + includedir + '/regfi',
-+                 destdir + mandir + '/man1']
-+
++                 destdir + mandir]
+ 
+-env.Install(prefix+'bin', [reglookup, reglookup_recover, 'bin/reglookup-timeline'])
+-libinstall = env.Install(prefix+'lib', [libregfi, libregfi_static])
+-env.Install(prefix+'include/regfi', Glob('include/*.h'))
+-env.Install(prefix+'man/man1', [man_reglookup, man_reglookup_recover,
 +env.Install(destdir + bindir, [reglookup, reglookup_recover, 'bin/reglookup-timeline'])
-+env.Install(destdir + libdir, [libregfi, libregfi_static])
++libinstall = env.Install(destdir + libdir, [libregfi, libregfi_static])
 +env.Install(destdir + includedir + '/regfi', Glob('include/*.h'))
 +env.Install(destdir + mandir + '/man1', [man_reglookup, man_reglookup_recover,
                                  man_reglookup_timeline])
+-env.AddPostAction(libinstall, 'ldconfig')
  
  if sys.version_info[0] == 2:
+    install_items.append('pyregfi2-install.log')
 @@ -63,7 +76,7 @@
     env.Command('pyregfi2-install.log', ['python/pyregfi/__init__.py', 
                                          'python/pyregfi/structures.py', 

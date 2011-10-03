@@ -1,12 +1,12 @@
 Summary:	small utility for querying NT/2K/XP/2K3/Vista registries
 Summary(pl.UTF-8):	proste narzędzie do odpytywania rejestrów NT/2K/XP/2K3/Vista
 Name:		reglookup
-Version:	1.0.0
+Version:	1.0.1
 Release:	1
 License:	GPL v3
 Group:		Applications
 Source0:	http://projects.sentinelchicken.org/data/downloads/%{name}-src-%{version}.tar.gz
-# Source0-md5:	1fb1eea7435d368a91ade8c4016b5be6
+# Source0-md5:	c451c2dba904db8ae5b0531ca303e322
 Patch0:		%{name}-paths.patch
 Patch1:		%{name}-soname.patch
 URL:		http://projects.sentinelchicken.org/reglookup/
