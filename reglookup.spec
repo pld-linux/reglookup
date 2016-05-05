@@ -2,7 +2,7 @@ Summary:	small utility for querying NT/2K/XP/2K3/Vista registries
 Summary(pl.UTF-8):	proste narzędzie do odpytywania rejestrów NT/2K/XP/2K3/Vista
 Name:		reglookup
 Version:	1.0.1
-Release:	2
+Release:	3
 License:	GPL v3
 Group:		Applications
 Source0:	http://projects.sentinelchicken.org/data/downloads/%{name}-src-%{version}.tar.gz
@@ -105,6 +105,9 @@ INCLUDEDIR="%{_includedir}" \
 %scons install
 
 %{__python} pyregfi-distutils.py install \
+	--prefix=%{_prefix} \
+	--install-purelib=%{py_sitescriptdir} \
+	--install-platlib=%{py_sitedir} \
 	--optimize=2 \
 	--root=$RPM_BUILD_ROOT
 
